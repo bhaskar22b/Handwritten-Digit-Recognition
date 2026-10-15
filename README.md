@@ -1,35 +1,28 @@
-# Handwritten Digit Recognition using Machine Learning and Deep Learning
+# Handwritten Digit Recognition Using Machine Learning and Deep Learning
 
-## Accuracy using Machine Learning Algorithms:
+## Accuracy Using Machine Learning Algorithms
 
-i)	 K Nearest Neighbors: 96.67%
+1. K-Nearest Neighbors (KNN): **96.67%**
+2. Support Vector Machine (SVM): **97.91%**
+3. Random Forest Classifier: **96.82%**
 
-ii)	 SVM:	97.91%
+## Accuracy Using Deep Learning
 
-iii) Random Forest Classifier:	96.82%
+1. Three-Layer CNN using TensorFlow: **99.70%**
+2. Three-Layer CNN using Keras and Theano: **98.75%**
 
+## CNN Layer Output and Parameters
 
-## Accuracy using Deep Neural Networks:
+![CNN Layer Output](Outputs/Figure_3.png)
 
-i)	Three Layer Convolutional Neural Network using Tensorflow:	99.70%
+## CNN Training Accuracy
 
-ii)	Three Layer Convolutional Neural Network using Keras and Theano: 98.75%
+![CNN Training Accuracy](Outputs/Figure_1.png)
 
+## Prediction Accuracy
 
-## layer, output, param image:
+![Prediction Accuracy](Outputs/Figure_2.png)
 
-![Output a1](Figure_3/output.png "Output a1")
+## Test Images Classification Output
 
-## Chart of CNNTraning Accuracy image:
-
-![Output a1](Figure_1/output.png "Output a1")
-
-## Prediction Accuracy image:
-
-![Output a1](Figure_2/output.png "Output a1")
-
-
-## Test Images Classification Output:
-
-![Output a1](Outputs/output.png "Output a1")       
-
+![Test Images Classification Output](Outputs/output.png)
