@@ -1,0 +1,23 @@
+
+{
+  "name": "handwritten-digit-recognition-using-deep-learning",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Handwritten Digit Recognition using CNN, TensorFlow, Flask, and Tailwind CSS",
+  "scripts": {
+    "build": "npx @tailwindcss/cli -i ./static/src/input.css -o ./public/css/output.css --minify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bhaskar22b/Handwritten-Digit-Recognition.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bhaskar22b/Handwritten-Digit-Recognition/issues"
+  },
+  "homepage": "https://github.com/bhaskar22b/Handwritten-Digit-Recognition#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}

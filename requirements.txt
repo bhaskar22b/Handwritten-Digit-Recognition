@@ -1,6 +1,5 @@
-keras==2.13.1
-tensorflow==2.12.1
-scikit-learn==1.5.0
+
+Flask
+tensorflow==2.21.0
 numpy
-matplotlib
-opencv-python
+opencv-python-headless

@@ -127,3 +127,18 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+
+# Node.js dependencies
+node_modules/
+
+# IDE settings
+.idea/
+
+# Virtual environments
+venv/
+.venv/
+
+# Environment variables
+.env

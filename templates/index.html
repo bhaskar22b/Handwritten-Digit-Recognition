@@ -1,0 +1,1094 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#287A74">
+
+    <title>DigitAI | Handwritten Digit Recognition</title>
+    <meta name="description"
+          content="Recognize handwritten digits using a CNN trained on MNIST.">
+
+    <style>
+        :root {
+            --teal: #287A74;
+            --sea-teal: #55A8A0;
+            --mint: #AEEFD6;
+            --yellow: #FFF8B0;
+            --ink: #193B38;
+            --muted: #54736E;
+            --white: #FFFFFF;
+            --border: rgba(40, 122, 116, 0.22);
+            --shadow: 0 14px 40px rgba(40, 122, 116, 0.10);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--yellow);
+            color: var(--ink);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button, input {
+            font: inherit;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        .upload-zone:focus-within {
+            outline: 3px solid var(--sea-teal);
+            outline-offset: 3px;
+        }
+
+        .navbar {
+            background: var(--teal);
+            color: var(--white);
+            box-shadow: 0 4px 18px rgba(25, 59, 56, 0.12);
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: auto;
+            padding: 17px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: var(--yellow);
+            color: var(--teal);
+            display: grid;
+            place-items: center;
+            font-size: 17px;
+            font-weight: 900;
+        }
+
+        .brand-name {
+            margin: 0;
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .brand-subtitle {
+            margin: 3px 0 0;
+            color: var(--mint);
+            font-size: 12px;
+        }
+
+        .nav-status {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            font-size: 13px;
+            color: var(--mint);
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 6px;
+            border-radius: 50%;
+            background: var(--mint);
+        }
+
+        .version {
+            border: 1px solid rgba(255,255,255,.35);
+            padding: 7px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: auto;
+            padding: 54px 24px 35px;
+        }
+
+        .hero {
+            max-width: 760px;
+            margin: 0 auto 42px;
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 30px;
+            background: var(--mint);
+            color: var(--teal);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+        }
+
+        .hero h1 {
+            margin: 23px 0 16px;
+            font-size: clamp(34px, 5vw, 57px);
+            line-height: 1.12;
+            letter-spacing: -1.8px;
+            color: var(--teal);
+        }
+
+        .hero h1 span {
+            color: var(--sea-teal);
+        }
+
+        .hero p {
+            max-width: 620px;
+            margin: auto;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .card {
+            min-width: 0;
+            padding: 28px;
+            border: 1px solid var(--border);
+            border-radius: 23px;
+            background: rgba(255,255,255,.82);
+            box-shadow: var(--shadow);
+        }
+
+        .card-heading {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 25px;
+        }
+
+        .heading-icon {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: var(--mint);
+            color: var(--teal);
+            font-size: 23px;
+        }
+
+        .card-heading h2 {
+            margin: 0;
+            color: var(--teal);
+            font-size: 21px;
+        }
+
+        .card-heading p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .upload-zone {
+            min-height: 225px;
+            padding: 25px 16px;
+            border: 2px dashed var(--sea-teal);
+            border-radius: 17px;
+            background: #F0FFF8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: background .2s, border-color .2s;
+        }
+
+        .upload-zone:hover {
+            background: var(--mint);
+            border-color: var(--teal);
+        }
+
+        .upload-icon {
+            width: 62px;
+            height: 62px;
+            margin-bottom: 15px;
+            display: grid;
+            place-items: center;
+            border-radius: 18px;
+            background: var(--mint);
+            color: var(--teal);
+            font-size: 30px;
+        }
+
+        .upload-title {
+            color: var(--teal);
+            font-size: 16px;
+            font-weight: 750;
+        }
+
+        .upload-subtitle {
+            margin-top: 9px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .browse-label {
+            margin-top: 17px;
+            padding: 10px 19px;
+            border-radius: 9px;
+            background: var(--teal);
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .file-limit {
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .file-input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .selected-file {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            margin-top: 14px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--mint);
+        }
+
+        .selected-file.visible {
+            display: flex;
+        }
+
+        .file-symbol {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            border-radius: 10px;
+            background: white;
+            color: var(--teal);
+        }
+
+        .file-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-name {
+            overflow: hidden;
+            margin: 0;
+            color: var(--ink);
+            font-size: 13px;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-size {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .remove-button {
+            padding: 8px 10px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--teal);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .remove-button:hover {
+            background: white;
+        }
+
+        .error-message {
+            display: none;
+            margin-top: 14px;
+            padding: 12px 14px;
+            border: 1px solid #DFA59A;
+            border-radius: 11px;
+            background: #FFF0EC;
+            color: #8D3022;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        .predict-button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 22px;
+            padding: 16px 20px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--teal);
+            color: white;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background .2s, transform .2s;
+        }
+
+        .predict-button:hover:not(:disabled) {
+            background: #20645F;
+            transform: translateY(-1px);
+        }
+
+        .predict-button:disabled {
+            opacity: .7;
+            cursor: wait;
+        }
+
+        .privacy-note {
+            margin: 15px 0 0;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .result-panel {
+            padding: 23px 18px;
+            border: 1px solid rgba(85,168,160,.35);
+            border-radius: 17px;
+            background: var(--mint);
+            text-align: center;
+        }
+
+        .result-label {
+            color: var(--teal);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.7px;
+            text-transform: uppercase;
+        }
+
+        .digit-display {
+            width: 125px;
+            height: 125px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            background: var(--yellow);
+            color: var(--teal);
+            font-size: 76px;
+            font-weight: 900;
+            box-shadow: 0 5px 15px rgba(40,122,116,.08);
+        }
+
+        .result-caption {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .result-digit-name {
+            margin: 7px 0 0;
+            color: var(--teal);
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .confidence-section {
+            margin-top: 25px;
+        }
+
+        .confidence-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .confidence-row span:first-child {
+            color: var(--ink);
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .confidence-value {
+            color: var(--teal);
+            font-size: 18px;
+            font-weight: 850;
+        }
+
+        .progress-track {
+            height: 10px;
+            overflow: hidden;
+            border-radius: 20px;
+            background: #D9E6DF;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: var(--teal);
+            transition: width .7s ease;
+        }
+
+        .confidence-note {
+            margin-top: 11px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .preview-section {
+            margin-top: 25px;
+            padding-top: 22px;
+            border-top: 1px solid var(--border);
+        }
+
+        .preview-section h3 {
+            margin: 0;
+            color: var(--teal);
+            font-size: 14px;
+        }
+
+        .preview-section p {
+            margin: 7px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .preview-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 15px;
+            padding: 20px;
+            border-radius: 14px;
+            background: var(--teal);
+        }
+
+        .preview-image {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+        .empty-result {
+            min-height: 260px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed var(--sea-teal);
+            border-radius: 17px;
+            background: #F0FFF8;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 76px;
+            height: 76px;
+            display: grid;
+            place-items: center;
+            border-radius: 22px;
+            background: var(--mint);
+            color: var(--teal);
+            font-size: 37px;
+        }
+
+        .empty-result h3 {
+            margin: 18px 0 0;
+            color: var(--teal);
+            font-size: 17px;
+        }
+
+        .empty-result p {
+            max-width: 270px;
+            margin: 10px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--yellow);
+        }
+
+        .stat-box p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .stat-box strong {
+            display: block;
+            margin-top: 7px;
+            color: var(--teal);
+            font-size: 17px;
+        }
+
+        .workflow {
+            margin-top: 54px;
+        }
+
+        .section-heading {
+            margin-bottom: 23px;
+            text-align: center;
+        }
+
+        .section-heading span {
+            color: var(--teal);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.7px;
+            text-transform: uppercase;
+        }
+
+        .section-heading h2 {
+            margin: 10px 0 0;
+            color: var(--teal);
+            font-size: clamp(24px, 4vw, 32px);
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 17px;
+        }
+
+        .workflow-card {
+            padding: 23px;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            background: rgba(255,255,255,.76);
+            box-shadow: 0 7px 24px rgba(40,122,116,.06);
+        }
+
+        .step-number {
+            width: 43px;
+            height: 43px;
+            display: grid;
+            place-items: center;
+            border-radius: 13px;
+            background: var(--mint);
+            color: var(--teal);
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .workflow-card h3 {
+            margin: 17px 0 0;
+            color: var(--teal);
+            font-size: 17px;
+        }
+
+        .workflow-card p {
+            margin: 9px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        footer {
+            margin-top: 50px;
+            padding: 25px 10px 10px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            text-align: center;
+        }
+
+        footer p {
+            margin: 5px 0;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 800px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding-top: 38px;
+            }
+
+            .workflow-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .workflow-card {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .nav-inner {
+                padding: 14px 16px;
+            }
+
+            .brand-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .brand-name {
+                font-size: 18px;
+            }
+
+            .nav-status {
+                display: none;
+            }
+
+            .container {
+                padding: 32px 15px 25px;
+            }
+
+            .hero {
+                margin-bottom: 28px;
+            }
+
+            .hero h1 {
+                letter-spacing: -1px;
+            }
+
+            .hero p {
+                font-size: 14px;
+            }
+
+            .card {
+                padding: 20px;
+                border-radius: 18px;
+            }
+
+            .card-heading h2 {
+                font-size: 19px;
+            }
+
+            .upload-zone {
+                min-height: 205px;
+            }
+
+            .digit-display {
+                width: 110px;
+                height: 110px;
+                font-size: 66px;
+            }
+
+            .workflow {
+                margin-top: 40px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="{{ url_for('index') }}" class="brand">
+                <div class="brand-icon">AI</div>
+                <div>
+                    <p class="brand-name">DigitAI</p>
+                    <p class="brand-subtitle">Deep Learning Studio</p>
+                </div>
+            </a>
+
+            <div class="nav-status">
+                <span><span class="status-dot"></span>CNN Model</span>
+                <span>MNIST Dataset</span>
+            </div>
+
+            <span class="version">v1.0</span>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <div class="eyebrow">
+                POWERED BY CONVOLUTIONAL NEURAL NETWORKS
+            </div>
+
+            <h1>Every digit has a <span>story.</span></h1>
+
+            <p>
+                Upload a handwritten digit and watch your deep learning
+                model turn pixels into a prediction in seconds.
+            </p>
+        </section>
+
+        <!-- Upload and prediction -->
+        <section class="main-grid">
+
+            <!-- Upload card -->
+            <div class="card">
+                <div class="card-heading">
+                    <div class="heading-icon" aria-hidden="true">↑</div>
+                    <div>
+                        <h2>Upload your image</h2>
+                        <p>Choose a clear image containing one handwritten digit.</p>
+                    </div>
+                </div>
+
+                <form method="POST"
+                      enctype="multipart/form-data"
+                      id="upload-form">
+
+                    <label for="digit_image" class="upload-zone">
+                        <div class="upload-icon" aria-hidden="true">↑</div>
+                        <span class="upload-title">Choose an image to upload</span>
+                        <span class="upload-subtitle">PNG, JPG, JPEG or BMP</span>
+                        <span class="browse-label">Browse files</span>
+                        <span class="file-limit">Maximum file size: 5 MB</span>
+                    </label>
+
+                    <input
+                        type="file"
+                        id="digit_image"
+                        name="digit_image"
+                        class="file-input"
+                        accept=".png,.jpg,.jpeg,.bmp,image/png,image/jpeg,image/bmp"
+                        required
+                    >
+
+                    <div id="selected-file" class="selected-file">
+                        <div class="file-symbol" aria-hidden="true">▤</div>
+                        <div class="file-details">
+                            <p id="file-name" class="file-name"></p>
+                            <p id="file-size" class="file-size"></p>
+                        </div>
+                        <button type="button" id="remove-file"
+                                class="remove-button">
+                            Remove
+                        </button>
+                    </div>
+
+                    <p id="client-error" class="error-message" role="alert"></p>
+
+                    <button type="submit" id="predict-button"
+                            class="predict-button">
+                        <span id="button-text">Predict digit</span>
+                        <span aria-hidden="true">→</span>
+                    </button>
+
+                    <p class="privacy-note">
+                        Images are processed by your Flask application.
+                        This page does not save uploads itself.
+                    </p>
+                </form>
+            </div>
+
+            <!-- Results card -->
+            <aside class="card">
+                <div class="card-heading">
+                    <div class="heading-icon" aria-hidden="true">▥</div>
+                    <div>
+                        <h2>Prediction result</h2>
+                        <p>Neural network model output</p>
+                    </div>
+                </div>
+
+                {% if error %}
+                    <div class="error-message"
+                         style="display:block; margin-bottom:18px;"
+                         role="alert">
+                        {{ error }}
+                    </div>
+                {% endif %}
+
+                {% if prediction is not none %}
+                    <div class="result-panel">
+                        <p class="result-label">Predicted digit</p>
+
+                        <div class="digit-display">
+                            {{ prediction }}
+                        </div>
+
+                        <p class="result-caption">
+                            The model predicts this image is:
+                        </p>
+
+                        <p class="result-digit-name">
+                            Digit {{ prediction }}
+                        </p>
+                    </div>
+
+                    <div class="confidence-section">
+                        <div class="confidence-row">
+                            <span>Model confidence</span>
+                            <span class="confidence-value">
+                                {{ "%.2f"|format(confidence) }}%
+                            </span>
+                        </div>
+
+                        <div class="progress-track"
+                             role="progressbar"
+                             aria-label="Model confidence"
+                             aria-valuenow="{{ confidence }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                            <div class="progress-fill"
+                                 style="width: {{ confidence }}%;"></div>
+                        </div>
+
+                        <p class="confidence-note">
+                            This score represents the model's confidence
+                            in its selected class. It does not verify that
+                            the image actually contains a handwritten digit.
+                        </p>
+                    </div>
+
+                    {% if image_preview %}
+                        <div class="preview-section">
+                            <h3>Processed model input</h3>
+                            <p>Centered, grayscale 28 × 28 image</p>
+
+                            <div class="preview-box">
+                                <img
+                                    src="data:image/png;base64,{{ image_preview }}"
+                                    alt="Processed image passed to the CNN"
+                                    width="140"
+                                    height="140"
+                                    class="preview-image"
+                                >
+                            </div>
+                        </div>
+                    {% endif %}
+
+                {% else %}
+                    <div class="empty-result">
+                        <div class="empty-icon" aria-hidden="true">▦</div>
+                        <h3>Waiting for your digit</h3>
+                        <p>
+                            Upload an image and click Predict digit.
+                            Your result will appear here.
+                        </p>
+                    </div>
+                {% endif %}
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <p>Input size</p>
+                        <strong>28 × 28</strong>
+                    </div>
+                    <div class="stat-box">
+                        <p>Classes</p>
+                        <strong>0–9</strong>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <!-- How it works -->
+        <section class="workflow">
+            <div class="section-heading">
+                <span>The workflow</span>
+                <h2>From pixels to prediction</h2>
+            </div>
+
+            <div class="workflow-grid">
+                <article class="workflow-card">
+                    <div class="step-number">01</div>
+                    <h3>Upload</h3>
+                    <p>
+                        Select a clear image of a single handwritten digit
+                        from your device.
+                    </p>
+                </article>
+
+                <article class="workflow-card">
+                    <div class="step-number">02</div>
+                    <h3>Process</h3>
+                    <p>
+                        OpenCV prepares the image in the format expected
+                        by your convolutional neural network.
+                    </p>
+                </article>
+
+                <article class="workflow-card">
+                    <div class="step-number">03</div>
+                    <h3>Predict</h3>
+                    <p>
+                        Your trained model predicts a digit from 0 to 9
+                        and returns its confidence score.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>Built with Python, Flask, TensorFlow and OpenCV.</p>
+            <p>Handwritten Digit Recognition · MNIST CNN Project</p>
+        </footer>
+    </main>
+
+    <script>
+        const fileInput = document.getElementById("digit_image");
+        const selectedFile = document.getElementById("selected-file");
+        const fileName = document.getElementById("file-name");
+        const fileSize = document.getElementById("file-size");
+        const removeButton = document.getElementById("remove-file");
+        const clientError = document.getElementById("client-error");
+        const form = document.getElementById("upload-form");
+        const predictButton = document.getElementById("predict-button");
+        const buttonText = document.getElementById("button-text");
+
+        const MAX_FILE_SIZE = 5 * 1024 * 1024;
+        const allowedExtensions = ["png", "jpg", "jpeg", "bmp"];
+
+        function showError(message) {
+            clientError.textContent = message;
+            clientError.classList.add("visible");
+        }
+
+        function clearError() {
+            clientError.textContent = "";
+            clientError.classList.remove("visible");
+        }
+
+        function resetFile() {
+            fileInput.value = "";
+            selectedFile.classList.remove("visible");
+            fileName.textContent = "";
+            fileSize.textContent = "";
+            clearError();
+        }
+
+        fileInput.addEventListener("change", function () {
+            clearError();
+
+            const file = this.files[0];
+
+            if (!file) {
+                resetFile();
+                return;
+            }
+
+            const extension = file.name.split(".").pop().toLowerCase();
+
+            if (!allowedExtensions.includes(extension)) {
+                resetFile();
+                showError("Please select a PNG, JPG, JPEG or BMP image.");
+                return;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                resetFile();
+                showError("This image exceeds 5 MB. Please choose a smaller image.");
+                return;
+            }
+
+            if (file.size === 0) {
+                resetFile();
+                showError("This file is empty. Please choose another image.");
+                return;
+            }
+
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / 1024).toFixed(1) + " KB";
+            selectedFile.classList.add("visible");
+        });
+
+        removeButton.addEventListener("click", resetFile);
+
+        form.addEventListener("submit", function (event) {
+            clearError();
+
+            if (!fileInput.files.length) {
+                event.preventDefault();
+                showError("Please choose an image before predicting.");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const extension = file.name.split(".").pop().toLowerCase();
+
+            if (!allowedExtensions.includes(extension)) {
+                event.preventDefault();
+                showError("Please select a supported image format.");
+                return;
+            }
+
+            if (file.size === 0 || file.size > MAX_FILE_SIZE) {
+                event.preventDefault();
+                showError("Choose a non-empty image no larger than 5 MB.");
+                return;
+            }
+
+            predictButton.disabled = true;
+            buttonText.textContent = "Analyzing image...";
+        });
+    </script>
+</body>
+</html>
